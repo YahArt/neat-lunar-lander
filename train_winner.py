@@ -12,7 +12,7 @@ import numpy as np
 import neat
 import gym 
 import Box2D
-# import visualize
+import helpers.visualize
 
 
 
@@ -36,11 +36,10 @@ def eval_genome(genome, config): #wichtiger teil, den wir anpassen müssen
         done = False
 
         while not done:
-            #action = np.argmax(net.activate(observation)) #take action based on observation
-            action = net.activate(observation)
+            action = np.argmax(net.activate(observation)) #take action based on observation
+            #action = net.activate(observation)
             observation, reward, done, info = env.step(action) #action von oben ausführen, also das aus dem net? net.activate entspricht in etwas dem predict aus anderen deep/ml algo
             fitness += reward
-            # env.render()
 
         fitnesses.append(fitness)
 
@@ -56,7 +55,7 @@ def run(): #ändert sich eigentlich nie
     # Load the config file, which is assumed to live in
     # the same directory as this script.
     local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'config-feedforward.txt')
+    config_path = os.path.join(local_dir, 'config/config-feedforward.txt')
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
@@ -70,7 +69,7 @@ def run(): #ändert sich eigentlich nie
     winner = pop.run(pe.evaluate)
 
     # Save the winner.
-    with open('winner-feedforward', 'wb') as f:
+    with open('winner/winner-feedforward', 'wb') as f:
         pickle.dump(winner, f)
 
     print(winner)
