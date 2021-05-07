@@ -21,6 +21,23 @@ import math
 runs_per_net = 2 #depends how env. starts, like if its a realy random initialisation, then you might want to give it chance to run 
 #simulation_seconds = 60.0 <-- not needed as env. kills itself?
 
+def evaluate_fitness(x_pos, contact_leg_one, contact_leg_two):
+    fitness = 0.0
+    
+    # The middle is at 0.0
+    penalty = abs(x_pos) * -1
+
+    # Reward if lunar lander is pretty close to the middle
+    bonus = x_pos > -0.2 and x_pos < 0.2
+
+    fitness += penalty
+    if bonus:
+        fitness += 2
+    elif bonus and contact_leg_one and contact_leg_two:
+        fitness += 5
+
+    return fitness
+
 
 # Use the NN network phenotype and the discrete actuator force function.
 def eval_genome(genome, config): #wichtiger teil, den wir anpassen müssen
@@ -42,13 +59,7 @@ def eval_genome(genome, config): #wichtiger teil, den wir anpassen müssen
             x_pos = observation[0]
             contact_leg_one = observation[6] == 1.0
             contact_leg_two = observation[7] == 1.0
-            penalty = abs(x_pos) * -1
-            bonus = x_pos > -0.2 and x_pos < 0.2
-            fitness += penalty
-            if bonus:
-                fitness += 2
-            elif bonus and contact_leg_one and contact_leg_two:
-                fitness 
+            fitness += evaluate_fitness(x_pos, contact_leg_one, contact_leg_two) 
         fitnesses.append(fitness)
 
     return np.mean(fitnesses)
