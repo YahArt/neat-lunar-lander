@@ -13,6 +13,7 @@ import neat
 import gym 
 import Box2D
 import helpers.visualize
+import math
 
 
 
@@ -37,10 +38,17 @@ def eval_genome(genome, config): #wichtiger teil, den wir anpassen müssen
 
         while not done:
             action = np.argmax(net.activate(observation)) #take action based on observation
-            #action = net.activate(observation)
             observation, reward, done, info = env.step(action) #action von oben ausführen, also das aus dem net? net.activate entspricht in etwas dem predict aus anderen deep/ml algo
-            fitness += reward
-
+            x_pos = observation[0]
+            contact_leg_one = observation[6] == 1.0
+            contact_leg_two = observation[7] == 1.0
+            penalty = abs(x_pos) * -1
+            bonus = x_pos > -0.2 and x_pos < 0.2
+            fitness += penalty
+            if bonus:
+                fitness += 2
+            elif bonus and contact_leg_one and contact_leg_two:
+                fitness 
         fitnesses.append(fitness)
 
     return np.mean(fitnesses)
