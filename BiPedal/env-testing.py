@@ -5,7 +5,7 @@ import gym #für saubere installation use https://anaconda.org/conda-forge/gym
 
 #enviroment für gym erstellen
 #something like:
-env = gym.make('CartPole-v1')
+env = gym.make('LunarLander-v2')
 
 print("Hello")
 
