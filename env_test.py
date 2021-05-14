@@ -14,16 +14,28 @@ def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_cur
     # vt-1 = vel_old
     # wt = angular_vel_current
     # wt-1 = angular_vel_old
+    landed_reward = 0
     pos_distance = np.linalg.norm(pos_current - pos_old)
     vel_distance = np.linalg.norm(vel_current - vel_old)
     angular_vel_distance = angular_vel_current - angular_vel_old
 
-    result = -100 * pos_distance - 100 * vel_distance - 100 * angular_vel_distance + has_landed
+    if has_landed:
+        landed_reward = 50
+
+    result = -100 * pos_distance - 100 * vel_distance - 100 * angular_vel_distance + landed_reward
+
+    print("Pos Current X/Y ", pos_current)
+    print("Pos Old X/Y ", pos_old)
+
+
+    print("Vel Current X/Y ", vel_current)
+    print("Vel Old X/Y ", vel_old)
+
 
     print("Pos Distance ", pos_distance)
     print("Vel Distance ", vel_distance)
     print("Angular Vel Distance ", angular_vel_distance)
-    print("has_landed", has_landed)
+    print("Landed Reward ", landed_reward)
     print("Result ", result)
 
 
@@ -61,10 +73,11 @@ while not done:
     # Angular Velocity x and y
     angular_vel_current = observation[5]
 
-    contact_leg_one = observation[6]
-    contact_leg_two = observation[7]
+    contact_leg_one = observation[6] == 1.0
+    contact_leg_two = observation[7] == 1.0
 
-    has_landed = contact_leg_one + contact_leg_two
+    has_landed = contact_leg_one and contact_leg_two
+
 
     if first_step:
         pos_old = pos_current

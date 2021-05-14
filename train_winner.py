@@ -39,7 +39,7 @@ def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_cur
     angular_vel_distance = angular_vel_current - angular_vel_old
 
     if has_landed:
-        landed_reward = 20
+        landed_reward = 50
 
     return -100 * pos_distance - 100 * vel_distance - 100 * angular_vel_distance + landed_reward
 
