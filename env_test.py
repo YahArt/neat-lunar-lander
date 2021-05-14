@@ -3,7 +3,7 @@ import gym #für saubere installation use https://anaconda.org/conda-forge/gym
 import numpy as np
 
 
-def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed):
+def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed, is_using_main_engine):
     fitness = 0.0
 
 
@@ -15,14 +15,18 @@ def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_cur
     # wt = angular_vel_current
     # wt-1 = angular_vel_old
     landed_reward = 0
+    using_main_engine_punishment = 0
     pos_distance = np.linalg.norm(pos_current - pos_old)
     vel_distance = np.linalg.norm(vel_current - vel_old)
     angular_vel_distance = angular_vel_current - angular_vel_old
 
     if has_landed:
-        landed_reward = 50
+        landed_reward = 100
 
-    result = -100 * pos_distance - 100 * vel_distance - 100 * angular_vel_distance + landed_reward
+    if is_using_main_engine:
+        using_main_engine_punishment = -2
+
+    result = -100 * pos_distance - 100 * vel_distance -100 * angular_vel_distance + landed_reward + using_main_engine_punishment
 
     print("Pos Current X/Y ", pos_current)
     print("Pos Old X/Y ", pos_old)
@@ -36,8 +40,9 @@ def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_cur
     print("Vel Distance ", vel_distance)
     print("Angular Vel Distance ", angular_vel_distance)
     print("Landed Reward ", landed_reward)
-    print("Result ", result)
 
+    print("Using Main Engine: ", is_using_main_engine)
+    print("Result ", result)
 
     return result
 
@@ -63,7 +68,16 @@ angular_vel_current = 0
 first_step = True
 
 while not done:
-    observation, reward, done, info = env.step(env.action_space.sample()) #action_space.sample lässt den moonlander einfach zufällig Aktionen ausführen
+    current_action = env.action_space.sample()
+    observation, reward, done, info = env.step(current_action) #action_space.sample lässt den moonlander einfach zufällig Aktionen ausführen
+    
+    # Actions go from 0 to 3
+    # 0: do nothing
+    # 1: fire left orientation engine
+    # 2: fire main engine
+    # 3: fire right orientation engine
+    is_using_main_engine = current_action == 2
+
     # Position x and y
     pos_current = np.array((observation[0], observation[1]))
 
@@ -85,7 +99,7 @@ while not done:
         angular_vel_old = angular_vel_current
         first_step = False
 
-    evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed)
+    evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed, is_using_main_engine)
 
     # Save the last state
     pos_old = pos_current

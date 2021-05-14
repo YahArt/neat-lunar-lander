@@ -21,7 +21,7 @@ import math
 runs_per_net = 2 #depends how env. starts, like if its a realy random initialisation, then you might want to give it chance to run 
 #simulation_seconds = 60.0 <-- not needed as env. kills itself?
 
-def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed):
+def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed, is_using_main_engine):
     # https://arxiv.org/pdf/2011.11850.pdf
     fitness = 0.0
 
@@ -34,14 +34,19 @@ def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_cur
     # wt = angular_vel_current
     # wt-1 = angular_vel_old
     landed_reward = 0
+    using_main_engine_punishment = 0
     pos_distance = np.linalg.norm(pos_current - pos_old)
     vel_distance = np.linalg.norm(vel_current - vel_old)
     angular_vel_distance = angular_vel_current - angular_vel_old
 
     if has_landed:
-        landed_reward = 50
+        landed_reward = 100
 
-    return -100 * pos_distance - 100 * vel_distance - 100 * angular_vel_distance + landed_reward
+
+    if is_using_main_engine:
+        using_main_engine_punishment = 0.05
+
+    return -100 * pos_distance - 100 * vel_distance -100 * angular_vel_distance + landed_reward -100 * using_main_engine_punishment
 
 def calculate_vector_distance(a, b):
     return np.linalg.norm(a - b)
@@ -73,6 +78,13 @@ def eval_genome(genome, config): #wichtiger teil, den wir anpassen müssen
         while not done:
             action = np.argmax(net.activate(observation)) #take action based on observation
             observation, reward, done, info = env.step(action) #action von oben ausführen, also das aus dem net? net.activate entspricht in etwas dem predict aus anderen deep/ml algo
+            
+            # Actions go from 0 to 3
+            # 0: do nothing
+            # 1: fire left orientation engine
+            # 2: fire main engine
+            # 3: fire right orientation engine
+            is_using_main_engine = action == 2
 
             # Position x and y
             pos_current = np.array((observation[0], observation[1]))
@@ -94,7 +106,7 @@ def eval_genome(genome, config): #wichtiger teil, den wir anpassen müssen
                 angular_vel_old = angular_vel_current
                 first_step = False
 
-            fitness += evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed)
+            fitness += evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed, is_using_main_engine)
 
             # Save the last state
             pos_old = pos_current
