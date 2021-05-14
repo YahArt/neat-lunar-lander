@@ -44,7 +44,7 @@ def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_cur
 
 
     if is_using_main_engine:
-        using_main_engine_punishment = 0.05
+        using_main_engine_punishment = 0.5
 
     return -100 * pos_distance - 100 * vel_distance -100 * angular_vel_distance + landed_reward -100 * using_main_engine_punishment
 
