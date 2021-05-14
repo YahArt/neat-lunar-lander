@@ -21,23 +21,30 @@ import math
 runs_per_net = 2 #depends how env. starts, like if its a realy random initialisation, then you might want to give it chance to run 
 #simulation_seconds = 60.0 <-- not needed as env. kills itself?
 
-def evaluate_fitness(x_pos, contact_leg_one, contact_leg_two):
+def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed):
+    # https://arxiv.org/pdf/2011.11850.pdf
     fitness = 0.0
-    
-    # The middle is at 0.0
-    penalty = abs(x_pos) * -1
 
-    # Reward if lunar lander is pretty close to the middle
-    bonus = x_pos > -0.2 and x_pos < 0.2
 
-    fitness += penalty
-    if bonus:
-        fitness += 2
-    elif bonus and contact_leg_one and contact_leg_two:
-        fitness += 5
+    # −100 ∗ (dt − dt−1) − 100 ∗ (vt − vt−1) −100 ∗ (ωt − ωt−1) + hasLanded(st)
+    # dt = pos_current
+    # dt-1 = pos_old
+    # vt = vel_current
+    # vt-1 = vel_old
+    # wt = angular_vel_current
+    # wt-1 = angular_vel_old
+    landed_reward = 0
+    pos_distance = np.linalg.norm(pos_current - pos_old)
+    vel_distance = np.linalg.norm(vel_current - vel_old)
+    angular_vel_distance = angular_vel_current - angular_vel_old
 
-    return fitness
+    if has_landed:
+        landed_reward = 20
 
+    return -100 * pos_distance - 100 * vel_distance - 100 * angular_vel_distance + landed_reward
+
+def calculate_vector_distance(a, b):
+    return np.linalg.norm(a - b)
 
 # Use the NN network phenotype and the discrete actuator force function.
 def eval_genome(genome, config): #wichtiger teil, den wir anpassen müssen
@@ -53,13 +60,46 @@ def eval_genome(genome, config): #wichtiger teil, den wir anpassen müssen
         fitness = 0.0
         done = False
 
+        pos_old = np.array((0, 0))
+        vel_old = np.array((0, 0))
+        angular_vel_old = 0
+
+        pos_current = np.array((0, 0))
+        vel_current = np.array((0, 0))
+        angular_vel_current = 0
+
+        first_step = True
+
         while not done:
             action = np.argmax(net.activate(observation)) #take action based on observation
             observation, reward, done, info = env.step(action) #action von oben ausführen, also das aus dem net? net.activate entspricht in etwas dem predict aus anderen deep/ml algo
-            x_pos = observation[0]
+
+            # Position x and y
+            pos_current = np.array((observation[0], observation[1]))
+
+            # Velocity x and y
+            vel_current = np.array((observation[2], observation[3]))
+
+            # Angular Velocity x and y
+            angular_vel_current = observation[5]
+
             contact_leg_one = observation[6] == 1.0
             contact_leg_two = observation[7] == 1.0
-            fitness += evaluate_fitness(x_pos, contact_leg_one, contact_leg_two) 
+
+            has_landed = contact_leg_one and contact_leg_two
+
+            if first_step:
+                pos_old = pos_current
+                vel_old = vel_current
+                angular_vel_old = angular_vel_current
+                first_step = False
+
+            fitness += evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed)
+
+            # Save the last state
+            pos_old = pos_current
+            vel_old = vel_current
+            angular_vel_old = angular_vel_current
         fitnesses.append(fitness)
 
     return np.mean(fitnesses)
