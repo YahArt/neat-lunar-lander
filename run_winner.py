@@ -3,10 +3,11 @@ import pickle
 import neat
 import gym
 import numpy as np
+import time
 
 #load the winner
-with open('winner/winner-feedforward', 'rb') as f:
-    c = pickle.load(f)
+with open('winnerIterations/winner-feedforward', 'rb') as f:
+	c = pickle.load(f)
 
 
 #Load the config file, which is assumed to live in the same directory as this script.
@@ -18,9 +19,12 @@ net = neat.nn.FeedForwardNetwork.create(c, config)
 env = gym.make('LunarLander-v2')
 observation = env.reset()
 
+
+
 done = False
 
 while not done:
-    action = np.argmax(net.activate(observation))
-    observation, reward, done, info = env.step(action)
-    env.render()
+	time.sleep(0.02)
+	action = np.argmax(net.activate(observation))
+	observation, reward, done, info = env.step(action)
+	env.render()

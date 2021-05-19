@@ -1,7 +1,7 @@
 #Import Bereich
 import gym #für saubere installation use https://anaconda.org/conda-forge/gym
 import numpy as np
-
+import time
 
 def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed, is_using_main_engine):
     fitness = 0.0
@@ -68,6 +68,7 @@ angular_vel_current = 0
 first_step = True
 
 while not done:
+    time.sleep(0.015)
     current_action = env.action_space.sample()
     observation, reward, done, info = env.step(current_action) #action_space.sample lässt den moonlander einfach zufällig Aktionen ausführen
     
@@ -107,3 +108,4 @@ while not done:
     angular_vel_old = angular_vel_current
 
     env.render()
+env.close()
