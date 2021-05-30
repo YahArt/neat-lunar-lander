@@ -5,7 +5,7 @@ import gym
 import numpy as np
 
 # Load the winner
-with open('winner/winner_Custom', 'rb') as f:
+with open('winner/winner_Custom_punish_main_engine', 'rb') as f:
 	c = pickle.load(f)
 
 
