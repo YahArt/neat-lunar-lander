@@ -3,9 +3,6 @@ import numpy as np
 import time
 
 def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed, is_using_main_engine):
-    fitness = 0.0
-
-
     # −100 ∗ (dt − dt−1) − 100 ∗ (vt − vt−1) −100 ∗ (ωt − ωt−1) + hasLanded(st)
     # dt = pos_current
     # dt-1 = pos_old

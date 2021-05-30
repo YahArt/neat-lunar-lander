@@ -23,9 +23,6 @@ runs_per_net = 2 #depends how env. starts, like if its a realy random initialisa
 
 def evaluate_fitness(pos_current, pos_old, vel_current, vel_old, angular_vel_current, angular_vel_old, has_landed, is_using_main_engine):
     # https://arxiv.org/pdf/2011.11850.pdf
-    fitness = 0.0
-
-
     # −100 ∗ (dt − dt−1) − 100 ∗ (vt − vt−1) −100 ∗ (ωt − ωt−1) + hasLanded(st)
     # dt = pos_current
     # dt-1 = pos_old
@@ -77,7 +74,7 @@ def eval_genome(genome, config): #wichtiger teil, den wir anpassen müssen
 
         while not done:
             action = np.argmax(net.activate(observation)) #take action based on observation
-            observation, reward, done, info = env.step(action) #action von oben ausführen, also das aus dem net? net.activate entspricht in etwas dem predict aus anderen deep/ml algo
+            observation, reward, done, info = env.step(action)
             
             # Actions go from 0 to 3
             # 0: do nothing
@@ -123,8 +120,7 @@ def eval_genomes(genomes, config): #ändert sich eigentlich nie
 
 
 def run(): #ändert sich eigentlich nie
-    # Load the config file, which is assumed to live in
-    # the same directory as this script.
+    # Load the config file
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config/config-feedforward.txt')
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
@@ -143,21 +139,5 @@ def run(): #ändert sich eigentlich nie
     with open('winner/winner-feedforward', 'wb') as f:
         pickle.dump(winner, f)
 
-    print(winner)
-"""
-    visualize.plot_stats(stats, ylog=True, view=True, filename="feedforward-fitness.svg")
-    visualize.plot_species(stats, view=True, filename="feedforward-speciation.svg")
-
-    node_names = {-1: 'x', -2: 'dx', -3: 'theta', -4: 'dtheta', 0: 'control'}
-    visualize.draw_net(config, winner, True, node_names=node_names)
-
-    visualize.draw_net(config, winner, view=True, node_names=node_names,
-                       filename="winner-feedforward.gv")
-    visualize.draw_net(config, winner, view=True, node_names=node_names,
-                       filename="winner-feedforward-enabled.gv", show_disabled=False)
-    visualize.draw_net(config, winner, view=True, node_names=node_names,
-                       filename="winner-feedforward-enabled-pruned.gv", show_disabled=False, prune_unused=True)
-
-"""
 if __name__ == '__main__':
     run()
