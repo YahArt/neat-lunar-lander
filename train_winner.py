@@ -12,7 +12,6 @@ import numpy as np
 import neat
 import gym 
 import Box2D
-import helpers.visualize
 import math
 
 
