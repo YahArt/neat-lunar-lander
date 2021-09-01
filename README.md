@@ -8,6 +8,7 @@ Lunar Lander from Open AI Gym trained with the NEAT Algorithm.
 
 Then execute the following commands:
 * `pip install wheel`
+* `pip install pyglet`
 * `pip install gym`
 * `pip install box2d-py`
 * `pip install numpy`
